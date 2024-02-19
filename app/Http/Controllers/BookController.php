@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\Type;
 use Exception;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
@@ -44,7 +45,7 @@ class BookController extends Controller
             'description' => 'required',
             'year' => '',
             'page' => 'required',
-            'cover' => 'required',
+            'cover' => '',
         ]);
 
         if ($validator->fails()) {
@@ -65,14 +66,14 @@ class BookController extends Controller
                     'description' => $req->description,
                     'year' => $req->year,
                     'page' => $req->page,
-                    'cover' => null,
+                    'cover' => '/assets/404-book-img.png',
                 ];
 
                 if ($req->hasFile('cover')) {
                     $file = $req->file('cover');
                     $fileName = Str::slug($req->title) . '.' . $file->getClientOriginalExtension();
                     $path = $file->storeAs('books', $fileName);
-                    $data['cover'] = $path;
+                    $data['cover'] =  '/storage/' . $path;
                 }
 
                 $book = Book::create($data);
@@ -109,7 +110,7 @@ class BookController extends Controller
                 'description' => 'required',
                 'year' => '',
                 'page' => 'required',
-                'cover' => 'required',
+                'cover' => '',
             ]);
 
             $data = [
@@ -131,7 +132,7 @@ class BookController extends Controller
             } else {
                 $fileName = Str::slug($req->title) . '.' . $req->file('cover')->getClientOriginalExtension();
                 $path = $req->file('cover')->storeAs('books', $fileName);
-                $data['cover'] = $path;
+                $data['cover'] = '/storage/' . $path;
             }
 
             $book->save($data);
@@ -161,7 +162,15 @@ class BookController extends Controller
     public function delete($slug)
     {
         try {
+            // RENTLOGS, REVIEW, TYPE, CATEGORIES, FAVORITES
             $book = Book::where('slug', $slug)->first();
+
+            $book->types->delete();
+            // $book->rentlogs()->delete();
+            // $book->reviews()->delete();
+            // $book->favorites()->delete();
+
+            Storage::delete($book->cover);
             $book->categories()->detach();
             $book->delete();
 
