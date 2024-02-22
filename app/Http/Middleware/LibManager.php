@@ -19,6 +19,7 @@ class LibManager
         if (Auth::user()->role == 'user') {
             return response()->json([
                 'status' => 'error',
+                'type' => 'forbidden',
                 'message' => 'YOU ARE NOT LIB MANAGER',
             ]);
         }

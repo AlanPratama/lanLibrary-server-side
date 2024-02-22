@@ -19,6 +19,7 @@ class OnlyAdmin
         if (Auth::user()->role != 'admin') {
             return response()->json([
                 'status' => 'error',
+                'type' => 'forbidden',
                 'message' => 'YOU ARE NOT ADMIN',
             ]);
         }

@@ -28,16 +28,15 @@ Route::get('/book/{slug}', [BookController::class, 'detail']);
 
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/logout', [AuthController::class, 'logout']);
 
 Route::get('/test', [AdminController::class, 'test']);
 // AUTH AUTH AUTH AUTH
 
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 
     Route::post('/favorite', [BookController::class, 'fav']);
-
 
     // RENT LOGS STATUS:
     // 1. NEED VERIFICATION
@@ -51,33 +50,39 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // 7. BROKEN
 
     // MAKE NEW RENT LOGS => STATUS == 'NEED VERIFICATION'
-    Route::post('/rent', [RentController::class, 'newRent']);
+    Route::get('/my-rent/{code}', [RentController::class, 'getOneMyRent']);
+    Route::get('/my-rent', [RentController::class, 'getAllMyRent']);
+    Route::get('/my-rent-normal', [RentController::class, 'getMyNormalRent']);
+    Route::get('/my-rent-violation', [RentController::class, 'getMyViolationRent']);
 
+    Route::get('/rent-needVerification', [RentController::class, 'getViolationRent']);
+    Route::get('/rent-normal', [RentController::class, 'normalRent']);
+    Route::get('/rent-violation', [RentController::class, 'violationRent']);
+    Route::post('/rent', [RentController::class, 'newRent']);
 
     // CHANGE STATUS RENT LOGS FROM 'NEED VERIFICATION' TO 'CANCELED'
     Route::post('/rent-cancel/{code}', [RentController::class, 'cancelRent']);
 
-    // CHANGE STATUS RENT LOGS FROM 'NEED VERIFICATION' TO 'VERIFIED'
-    Route::post('/rent-verify/{code}', [RentController::class, 'verifyRent']);
+
+    Route::middleware('libManager')->group(function () {
+        Route::prefix('/libManager')->group(function () {
+            // RENT RENT RENT RENT
+
+
+            // CHANGE STATUS RENT LOGS FROM 'NEED VERIFICATION' TO 'VERIFIED'
+            Route::post('/rent-verify/{code}', [RentController::class, 'verifyRent']);
+
+            // CHANGE STATUS RENT LOGS FROM 'VERIFIED' TO 'RETURNED' OR VIOLATION STATUS
+            Route::post('/rent-return/{code}', [RentController::class, 'returnRent']);
+
+
+            // VIOLATION RENT LOGS STATUS
+            // CHANGE STATUS RENT LOGS FROM 'VERIFIED' TO 'BROKEN'
+            Route::post('/rent-violation/{code}', [RentController::class, 'violationRent']);
 
 
 
-    // CHANGE STATUS RENT LOGS FROM 'VERIFIED' TO 'RETURNED' OR VIOLATION STATUS
-    Route::post('/rent-return/{code}', [RentController::class, 'returnRent']);
 
-
-
-
-
-
-
-
-
-
-
-
-    Route::middleware('libManager')->group(function() {
-        Route::prefix('/libManager')->group(function() {
 
             // USER USER USER USER
             Route::get('/user', [OfficerController::class, 'getUser']);
@@ -90,13 +95,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/book', [BookController::class, 'store']);
             Route::put('/book/{slug}', [BookController::class, 'update']);
             Route::delete('/book/{slug}', [BookController::class, 'delete']);
-
         });
     });
-
-
 });
-
-
-
-

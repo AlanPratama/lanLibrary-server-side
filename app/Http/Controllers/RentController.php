@@ -11,18 +11,177 @@ use Illuminate\Support\Str;
 
 class RentController extends Controller
 {
+
+    public function getOneMyRent($code)
+    {
+        $rent = Rentlogs::with('users', 'books')
+            ->where('code', $code)
+            ->where('user_id', Auth::user()->id)
+            ->first();
+
+        if ($rent) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $rent,
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'RENT LOGS NOT FOUND',
+            ]);
+        }
+    }
+
+    public function getAllMyRent()
+    {
+        $rent = Rentlogs::with('users', 'books')
+            ->where('user_id', Auth::user()->id)
+            ->get();
+
+        if ($rent->count() > 0) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $rent,
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'RENT LOGS NOT FOUND',
+            ]);
+        }
+    }
+
+
+    public function getMyNormalRent()
+    {
+        $rent = Rentlogs::with('users', 'books')
+            ->where('status', '!=', 'Overdue')
+            ->where('status', '!=', 'Broken')
+            ->where('status', '!=', 'Missing')
+            ->where('user_id', Auth::user()->id)
+            ->get();
+
+        if ($rent->count() > 0) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $rent,
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'RENT LOGS NOT FOUND',
+            ]);
+        }
+    }
+
+    public function getMyViolationRent()
+    {
+        $rent = Rentlogs::with('users', 'books')
+            ->where('status', 'Overdue')
+            ->where('status', 'Broken')
+            ->where('status', 'Missing')
+            ->where('user_id', Auth::user()->id)
+            ->get();
+
+        if ($rent->count() > 0) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $rent,
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'RENT LOGS NOT FOUND',
+            ]);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public function needVerification()
+    {
+        $rent = Rentlogs::where('user_id', Auth::user()->id)->where('status', 'Need Verification')->first();
+
+        if ($rent) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $rent,
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'RENT LOGS NOT FOUND',
+            ]);
+        }
+    }
+
+    public function normalRent()
+    {
+        $rent = Rentlogs::where('status', 'Returned')->where('user_id', Auth::user()->id)->get();
+    }
+
+    public function getViolationRent()
+    {
+        $rent = Rentlogs::where('status', 'Overdue')
+            ->where('status', 'Broken')
+            ->where('status', 'Missing')
+            ->where('user_id', Auth::user()->id)
+            ->get();
+
+        if ($rent->count() > 0) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $rent,
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'RENT LOGS NOT FOUND',
+            ]);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
     public function newRent(Request $req)
     {
-        $rentLogs = Rentlogs::where('user_id', Auth::user()->id)
-            ->where('status', 'Need Verification')
-            ->where('status', 'Overdue')
-            ->count();
+        $needVerify = Rentlogs::where('status', 'Need Verification')->count();
+        $verified = Rentlogs::where('status', 'Verified')->count();
 
-
-        if ($rentLogs > 0) {
+        if ($needVerify + $verified > 0) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'You have already rent a book',
+                'rent' => $needVerify + $verified
             ]);
         } else {
             $data = [
@@ -38,27 +197,50 @@ class RentController extends Controller
             return response()->json([
                 'status' => 'success',
                 'data' => $rent,
-            ]);
+                'rent' => $needVerify + $verified
+             ]);
         }
     }
 
     public function cancelRent($code)
     {
-        $rent = Rentlogs::where('code', $code)->where('status', 'Need Verification')->first();
+        if (Auth::user()->role == 'admin' || Auth::user()->role == 'officer') {
+            $rent = Rentlogs::where('code', $code)->where('status', 'Need Verification')->first();
 
-        if ($rent) {
-            $rent->status = 'Canceled';
-            $rent->save();
+            if ($rent) {
+                $rent->status = 'Canceled';
+                $rent->save();
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'SUCCESSFULLY CANCELED RENT LOGS',
-            ]);
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'SUCCESSFULLY CANCELED RENT LOGS',
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'RENT LOGS NOT FOUND',
+                ]);
+            }
         } else {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'RENT LOGS NOT FOUND',
-            ]);
+            $rent = Rentlogs::where('code', $code)
+                ->where('status', 'Need Verification')
+                ->where('user_id', Auth::user()->id)
+                ->first();
+
+            if ($rent) {
+                $rent->status = 'Canceled';
+                $rent->save();
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'SUCCESSFULLY CANCELED RENT LOGS',
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'RENT LOGS NOT FOUND! MAYBE BECAUSE IT IS NOT YOUR RENTLOGS?',
+                ]);
+            }
         }
 
     }
@@ -101,26 +283,87 @@ class RentController extends Controller
     public function returnRent($code)
     {
         $rent = Rentlogs::where('code', $code)->where('status', 'Verified')->first();
+        $now = Carbon::now()->toDateString();
 
         if ($rent) {
-            $book  = Book::findOrFail($rent->book_id);
-            $book->total_book += 1;
-            $book->save();
+            if ($rent->date_finish < $now) {
+                $book  = Book::findOrFail($rent->book_id);
+                $book->total_book += 1;
+                $book->save();
 
-            $rent->status = 'Returned';
-            $rent->return = Carbon::now()->toDateString();
-            $rent->save();
+                $dayLate = Carbon::parse($rent->date_finish)->diffInDays($now);
+                $rent->day_late = $dayLate;
+                $rent->penalties = $rent->day_late * 5000;
+
+                $rent->status = 'Returned Overdue';
+                $rent->return = Carbon::now()->toDateString();
+                $rent->save();
+
+                return response()->json([
+                    'status' => 'success',
+                    'violation' => true,
+                    'message' => 'MEMBER HAVE BEEN OVERDUE',
+                    'dayLate' => $dayLate,
+                    'penalties' => $rent->penalties,
+                    'data' => $rent->with('users', 'books')->first()
+                ]);
+
+            } else {
+                $book  = Book::findOrFail($rent->book_id);
+                $book->total_book += 1;
+                $book->save();
+
+                $rent->status = 'Returned';
+                $rent->return = Carbon::now()->toDateString();
+                $rent->save();
+
+                return response()->json([
+                    'status' => 'success',
+                    'violation' => false,
+                    'message' => 'SUCCESSFULLY RETURNED RENT LOGS',
+                    'data' => $rent->with('users', 'books')->first(),
+                ]);
+            }
+
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'RENT LOGS NOT FOUND',
+            ]);
+        }
+    }
+
+
+    public function violationRent(Request $req, $code)
+    {
+        $rent = Rentlogs::where('code', $code)->where('status', 'Verified')->first();
+
+        if ($rent) {
+            if ($req->status == 'Broken') {
+                $rent->status = 'Broken';
+                $rent->penalties = $req->penalties;
+                $rent->return = Carbon::now()->toDateString();
+                $rent->save();
+            } else {
+                $rent->status = 'Missing';
+                $rent->penalties = $req->penalties;
+                $rent->return = Carbon::now()->toDateString();
+                $rent->save();
+            }
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'SUCCESSFULLY RETURNED RENT LOGS',
+                'message' => 'SUCCESSFULLY VIOLATION RENT LOGS',
+                'data' => $rent,
             ]);
 
         } else {
             return response()->json([
                 'status' => 'error',
                 'message' => 'RENT LOGS NOT FOUND',
-            ])
+            ]);
         }
+
     }
+
 }
