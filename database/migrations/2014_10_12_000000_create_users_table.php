@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
 
             $table->string('role')->default('user');
+            $table->string('position')->default('Member');
+
             $table->string('verified')->default('not verified');
 
             $table->string('name');
@@ -24,6 +26,8 @@ return new class extends Migration
 
             $table->string('username');
             $table->string('password');
+
+            $table->string('slug')->nullable();
 
             $table->rememberToken();
             $table->timestamps();

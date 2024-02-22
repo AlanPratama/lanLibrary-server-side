@@ -15,14 +15,17 @@ class TypeSeeder extends Seeder
     {
         Type::create([
             'name' => 'Umum',
+            'slug' => 'umum',
         ]);
 
         Type::create([
             'name' => 'Novel',
+            'slug' => 'novel',
         ]);
 
         Type::create([
             'name' => 'Manga',
+            'slug' => 'manga',
         ]);
 
     }

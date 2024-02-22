@@ -21,7 +21,7 @@ return new class extends Migration
             $table->integer('total_book')->default(0);
 
             $table->string('title');
-            $table->string('slug');
+            $table->string('slug')->nullable();
             $table->string('writer');
             $table->string('publisher')->nullable();
             $table->text('description');

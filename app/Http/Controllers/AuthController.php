@@ -17,7 +17,7 @@ class AuthController extends Controller
     {
         $validator = Validator::make($req->all(), [
             'name' => 'required',
-            'email' => 'required',
+            'email' => 'required|unique:users,email',
             'phone' => 'required',
             'username' => 'required|unique:users,username|min:6',
             'password' => 'required|min:6',
@@ -34,8 +34,19 @@ class AuthController extends Controller
         }
 
         try {
-            $req['password'] = bcrypt($req['password']);
-            $user = User::create($req->all());
+            $data = [
+                'proPic' => '/assets/404-user-img.png',
+
+                'role' => 'user',
+                'position' => 'Member',
+                'name' => $req->name,
+                'email' => $req->email,
+                'phone' => $req->phone,
+                'username' => $req->username,
+                'password' => bcrypt($req->password)
+            ];
+
+            $user = User::create($data);
 
             return response()->json([
                 'status' => 'success',

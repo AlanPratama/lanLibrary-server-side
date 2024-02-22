@@ -28,7 +28,10 @@ class Book extends Model
         return $this->belongsToMany(Category::class, 'pivot_categories', 'book_id', 'category_id');
     }
 
-
+    // ADD TO FAVORITE FOR BOOK
+    public function favotites() {
+        return $this->hasMany(Favorite::class, 'book_id');
+    }
 
 
 

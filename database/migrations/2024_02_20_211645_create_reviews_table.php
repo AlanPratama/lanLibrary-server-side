@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('rentlogs', function (Blueprint $table) {
+        Schema::create('reviews', function (Blueprint $table) {
             $table->id();
 
             $table->string('code');
@@ -22,15 +22,8 @@ return new class extends Migration
             $table->unsignedBigInteger('book_id');
             $table->foreign('book_id')->references('id')->on('books');
 
-
-            $table->date('date_start');
-            $table->date('date_finish');
-            $table->date('return')->nullable();
-
-            $table->integer('day_late')->nullable();
-            $table->integer('penalties')->nullable();
-
-            $table->string('status')->default('Need Verification');
+            $table->integer('score');
+            $table->text('comment');
 
             $table->timestamps();
         });
@@ -41,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('rentlogs');
+        Schema::dropIfExists('reviews');
     }
 };

@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-// use Cviebrock\EloquentSluggable\Sluggable;
+use Cviebrock\EloquentSluggable\Sluggable;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Sluggable;
 
 
 
@@ -19,17 +19,23 @@ class User extends Authenticatable
         return $this->hasMany(Rentlogs::class, 'user_id');
     }
 
+    public function presents() {
+        return $this->hasMany(Present::class, 'user_id');
+    }
+
+    public function favotites() {
+        return $this->hasMany(Favorite::class, 'user_id');
+    }
 
 
-
-    // public function sluggable(): array
-    // {
-    //     return [
-    //         'slug' => [
-    //             'source' => 'username'
-    //         ]
-    //     ];
-    // }
+    public function sluggable(): array
+    {
+        return [
+            'slug' => [
+                'source' => 'username'
+            ]
+        ];
+    }
 
 
 

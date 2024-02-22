@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Rentlogs;
 use App\Models\User;
-use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
@@ -24,4 +23,7 @@ class AdminController extends Controller
             ],
         ]);
     }
+
+
+
 }
