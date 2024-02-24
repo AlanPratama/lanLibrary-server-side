@@ -96,6 +96,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/rent-violation/{code}', [RentController::class, 'violationRent']);
 
 
+            // GET RENTLOGS DATA
+            Route::get('/rentlogs', [RentController::class, 'aGetAllRent']);
+            Route::get('/rentlogs/need-verification', [RentController::class, 'aGetNVRent']);
+            Route::get('/rentlogs/verified', [RentController::class, 'aGetVerifiedRent']);
+            Route::get('/rentlogs/returned', [RentController::class, 'aGetReturnedRent']);
+
+
+            Route::get('/rentlogs/violation', [RentController::class, 'aGetAllRentVio']);
+
+
 
 
 

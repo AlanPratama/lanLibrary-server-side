@@ -249,7 +249,7 @@ class RentController extends Controller
         $review = Reviews::where('code', $code)->where('user_id', Auth::user()->id)->with('rentlogs')->first();
 
         if ($review) {
-            $review->rentlogs->each(function($rent) {
+            $review->rentlogs->each(function ($rent) {
                 $rent->reviews = null;
                 $rent->save();
             });
@@ -260,7 +260,6 @@ class RentController extends Controller
                 'status' => 'success',
                 'message' => 'SUCCESSFULLY DELETED THE REVIEW',
             ]);
-
         } else {
             return response()->json([
                 'status' => 'error',
@@ -491,6 +490,140 @@ class RentController extends Controller
                 'status' => 'error',
                 'message' => 'RENT LOGS NOT FOUND',
             ]);
+        }
+    }
+
+
+
+    // GET RENTLOGS ONLY OFFICER
+    public function aGetAllRent(Request $req)
+    {
+        // REQUEST => status | code
+
+        if ($req->status || $req->code) {
+
+            if ($req->status) {
+                $rent = Rentlogs::with('users', 'books')->where('status', $req->status)->get();
+            }
+
+            if ($req->code) {
+                $rent = Rentlogs::with('users', 'books')->where('code', 'LIKE', '%' . $req->code . '%')->get();
+            }
+        } else {
+            $rent = Rentlogs::with('users', 'books')->get();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $rent,
+        ]);
+    }
+
+    public function aGetNVRent(Request $req)
+    {
+        // REQUEST => users
+
+        if ($req->users) {
+            if ($req->users) {
+                $rent = Rentlogs::with('users', 'books')->whereHas('users', function ($q) use($req) {
+                            $q->where('name', 'LIKE', '%' . $req->users . '%');
+                        } )
+                        ->where('status', 'Need Verification')
+                        ->get();
+            }
+        } else {
+            $rent = Rentlogs::with('users', 'books')
+                ->where('status', 'Need Verification')
+                ->get();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $rent,
+        ]);
+    }
+
+    public function aGetVerifiedRent(Request $req)
+    {
+        // REQUEST => users
+
+        if ($req->users) {
+            if ($req->users) {
+                $rent = Rentlogs::with('users', 'books')->whereHas('users', function ($q) use($req) {
+                            $q->where('name', 'LIKE', '%' . $req->users . '%');
+                        } )
+                        ->where('status', 'Verified')
+                        ->get();
+            }
+        } else {
+            $rent = Rentlogs::with('users', 'books')
+                ->where('status', 'Verified')
+                ->get();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $rent,
+        ]);
+    }
+
+    public function aGetReturnedRent(Request $req)
+    {
+        // REQUEST => users
+
+        if ($req->users) {
+            if ($req->users) {
+                $rent = Rentlogs::with('users', 'books')->whereHas('users', function ($q) use($req) {
+                        $q->where('name', 'LIKE', '%' . $req->users . '%');
+                    } )
+                    ->where('status', 'Returned')
+                    ->get();
+            }
+        } else {
+            $rent = Rentlogs::with('users', 'books')
+                ->where('status', 'Returned')
+                ->get();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $rent,
+        ]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+    public function aGetAllRentVio(Request $req)
+    {
+        // REQUEST => status | code
+
+        if ($req->status || $req->code) {
+
+            if ($req->status) {
+                $rent = Rentlogs::with('users', 'books')
+                    ->where('status', $req->status)
+                    ->get();
+            }
+
+            if ($req->code) {
+                $rent = Rentlogs::with('users', 'books')->where('code', 'LIKE', '%' . $req->code . '%')->get();
+            }
+        } else {
+            $rent = Rentlogs::with('users', 'books')
+                ->where('status', $req->status)
+                ->where('status', 'Broken')
+                ->where('status', 'Broken & Overdue')
+                ->where('status', 'Missing')
+                ->where('status', 'Missing & Overdue')
+                ->get();
         }
     }
 }
