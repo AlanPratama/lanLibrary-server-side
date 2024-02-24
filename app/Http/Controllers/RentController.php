@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Rentlogs;
+use App\Models\Reviews;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -159,6 +160,114 @@ class RentController extends Controller
             ]);
         }
     }
+
+
+    // REVIEWS || REVIEWS || REVIEWS || REVIEWS || REVIEWS || REVIEWS || REVIEWS || REVIEWS
+
+    public function rentReview(Request $req, $code)
+    {
+        $rent = Rentlogs::where('code', $code)->where('user_id', Auth::user()->id)->first();
+
+        if ($rent) {
+            if ($rent->reviews != null) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'YOU ALREADY REVIEWED THE BOOK',
+                ]);
+            } else {
+                $data = [
+                    'code' => Str::random(14) . Auth::user()->slug,
+                    'user_id' => $rent->user_id,
+                    'book_id' => $rent->book_id,
+                    'score' => $req->score,
+                    'comment' => $req->comment,
+                ];
+
+                $review = Reviews::create($data);
+                $rent->reviews = $review->id;
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'SUCCESSFULLY REVIEWED THE BOOK',
+                    'review' => $review,
+                    'rent' => $rent,
+                ]);
+
+            }
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'RENT LOGS NOT FOUND',
+            ]);
+        }
+
+    }
+
+
+    public function updateReview(Request $req, $code)
+    {
+        $review = Reviews::where('code', $code)->first();
+
+        if ($req->score == null && $req->comment == null) {
+            if ($review) {
+                if ($req->score != null) {
+                    $review->score = $req->score;
+                }
+
+                if ($req->comment) {
+                    $review->comment = $req->comment;
+                }
+
+                $review->save();
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'SUCCESSFULLY UPDATED THE REVIEW',
+                    'data' => $review
+                ]);
+
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'REVIEW NOT FOUND',
+                ]);
+            }
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'from' => 'noReq',
+                'message' => 'PLEASE INPUT SCORE OR COMMENT BELOW',
+            ]);
+        }
+
+    }
+
+
+    public function deleteReview(Request $req, $code)
+    {
+        $review = Reviews::where('code', $code)->where('user_id', Auth::user()->id)->first();
+
+        if ($review) {
+            $review->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'SUCCESSFULLY DELETED THE REVIEW',
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'REVIEW NOT FOUND',
+            ]);
+        }
+    }
+
+
+
+
+
+
+
 
 
 

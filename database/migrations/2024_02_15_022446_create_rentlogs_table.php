@@ -22,6 +22,8 @@ return new class extends Migration
             $table->unsignedBigInteger('book_id');
             $table->foreign('book_id')->references('id')->on('books');
 
+            $table->unsignedBigInteger('reviews')->nullable();
+            $table->foreign('reviews')->references('id')->on('reviews');
 
             $table->date('date_start');
             $table->date('date_finish');

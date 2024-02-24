@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('role')->default('user');
             $table->string('position')->default('Member');
 
-            $table->string('verified')->default('not verified');
+            $table->string('verified')->default('Not Verified');
 
             $table->string('name');
             $table->string('email');
