@@ -19,4 +19,10 @@ class Rentlogs extends Model
     public function books() {
         return $this->belongsTo(Book::class, 'book_id');
     }
+
+
+    public function reviews() {
+        return $this->belongsTo(Reviews::class, 'reviews');
+    }
+
 }

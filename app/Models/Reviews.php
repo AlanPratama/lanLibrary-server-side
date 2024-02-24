@@ -20,6 +20,9 @@ class Reviews extends Model
     }
 
 
+    public function rentlogs() {
+        return $this->hasMany(Rentlogs::class, 'reviews');
+    }
 
 
 

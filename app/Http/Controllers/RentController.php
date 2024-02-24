@@ -166,6 +166,12 @@ class RentController extends Controller
 
     public function rentReview(Request $req, $code)
     {
+        // REQUEST => score (integer) | comment (string)
+        $req->validate([
+            'score' => 'required',
+            'comment' => 'required'
+        ]);
+
         $rent = Rentlogs::where('code', $code)->where('user_id', Auth::user()->id)->first();
 
         if ($rent) {
@@ -185,6 +191,7 @@ class RentController extends Controller
 
                 $review = Reviews::create($data);
                 $rent->reviews = $review->id;
+                $rent->save();
 
                 return response()->json([
                     'status' => 'success',
@@ -192,7 +199,6 @@ class RentController extends Controller
                     'review' => $review,
                     'rent' => $rent,
                 ]);
-
             }
         } else {
             return response()->json([
@@ -200,60 +206,61 @@ class RentController extends Controller
                 'message' => 'RENT LOGS NOT FOUND',
             ]);
         }
-
     }
 
 
     public function updateReview(Request $req, $code)
     {
+        // REQUEST => score (integer) | comment (string)
+        $req->validate([
+            'score' => 'required',
+            'comment' => 'required'
+        ]);
+
         $review = Reviews::where('code', $code)->first();
 
-        if ($req->score == null && $req->comment == null) {
-            if ($review) {
-                if ($req->score != null) {
-                    $review->score = $req->score;
-                }
-
-                if ($req->comment) {
-                    $review->comment = $req->comment;
-                }
-
-                $review->save();
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'SUCCESSFULLY UPDATED THE REVIEW',
-                    'data' => $review
-                ]);
-
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'REVIEW NOT FOUND',
-                ]);
+        if ($review) {
+            if ($req->score != null) {
+                $review->score = $req->score;
             }
+
+            if ($req->comment) {
+                $review->comment = $req->comment;
+            }
+
+            $review->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'SUCCESSFULLY UPDATED THE REVIEW',
+                'data' => $review
+            ]);
         } else {
             return response()->json([
                 'status' => 'error',
-                'from' => 'noReq',
-                'message' => 'PLEASE INPUT SCORE OR COMMENT BELOW',
+                'message' => 'REVIEW NOT FOUND',
             ]);
         }
-
     }
 
 
-    public function deleteReview(Request $req, $code)
+    public function deleteReview($code)
     {
-        $review = Reviews::where('code', $code)->where('user_id', Auth::user()->id)->first();
+        $review = Reviews::where('code', $code)->where('user_id', Auth::user()->id)->with('rentlogs')->first();
 
         if ($review) {
+            $review->rentlogs->each(function($rent) {
+                $rent->reviews = null;
+                $rent->save();
+            });
+
             $review->delete();
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'SUCCESSFULLY DELETED THE REVIEW',
             ]);
+
         } else {
             return response()->json([
                 'status' => 'error',
@@ -307,7 +314,7 @@ class RentController extends Controller
                 'status' => 'success',
                 'data' => $rent,
                 'rent' => $needVerify + $verified
-             ]);
+            ]);
         }
     }
 
@@ -351,7 +358,6 @@ class RentController extends Controller
                 ]);
             }
         }
-
     }
 
     public function verifyRent($code)
@@ -365,7 +371,6 @@ class RentController extends Controller
                     'status' => 'error',
                     'message' => 'BOOK OUT OF STOCK',
                 ]);
-
             } else {
                 $book->total_loan += 1;
                 $book->total_book -= 1;
@@ -377,10 +382,9 @@ class RentController extends Controller
                 return response()->json([
                     'status' => 'success',
                     'message' => 'SUCCESSFULLY VERIFIED RENT LOGS',
-                    'data' => $rent
+                    'data' => $rent->with('users', 'books')->first()
                 ]);
             }
-
         } else {
             return response()->json([
                 'status' => 'error',
@@ -416,7 +420,6 @@ class RentController extends Controller
                     'penalties' => $rent->penalties,
                     'data' => $rent->with('users', 'books')->first()
                 ]);
-
             } else {
                 $book  = Book::findOrFail($rent->book_id);
                 $book->total_book += 1;
@@ -433,7 +436,6 @@ class RentController extends Controller
                     'data' => $rent->with('users', 'books')->first(),
                 ]);
             }
-
         } else {
             return response()->json([
                 'status' => 'error',
@@ -445,17 +447,35 @@ class RentController extends Controller
 
     public function violationRent(Request $req, $code)
     {
+        // REQUEST => status (string) | penalties (integer)
+
         $rent = Rentlogs::where('code', $code)->where('status', 'Verified')->first();
+        $now  = Carbon::now()->toDateString();
 
         if ($rent) {
             if ($req->status == 'Broken') {
-                $rent->status = 'Broken';
-                $rent->penalties = $req->penalties;
+                if ($rent->date_finish < $now) {
+                    $rent->status = 'Broken & Overdue';
+                    $rent->penalties = Carbon::parse($rent->date_finish)->diffInDays($now) * 5000 + $req->penalties;
+                    $rent->day_late = Carbon::parse($rent->date_finish)->diffInDays($now);
+                } else {
+                    $rent->status = 'Broken';
+                    $rent->penalties = $req->penalties;
+                }
                 $rent->return = Carbon::now()->toDateString();
                 $rent->save();
-            } else {
-                $rent->status = 'Missing';
-                $rent->penalties = $req->penalties;
+
+                $rent->books->total_book += 1;
+                $rent->books->save();
+            } elseif ($req->status == 'Missing') {
+                if ($rent->date_finish < $now) {
+                    $rent->status = 'Missing & Overdue';
+                    $rent->penalties = Carbon::parse($rent->date_finish)->diffInDays($now) * 5000 + $req->penalties;
+                    $rent->dat_late = Carbon::parse($rent->date_finish)->diffInDays($now);
+                } else {
+                    $rent->status = 'Missing';
+                    $rent->penalties = $req->penalties;
+                }
                 $rent->return = Carbon::now()->toDateString();
                 $rent->save();
             }
@@ -463,16 +483,14 @@ class RentController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'SUCCESSFULLY VIOLATION RENT LOGS',
+                'violation' => $rent->status,
                 'data' => $rent,
             ]);
-
         } else {
             return response()->json([
                 'status' => 'error',
                 'message' => 'RENT LOGS NOT FOUND',
             ]);
         }
-
     }
-
 }

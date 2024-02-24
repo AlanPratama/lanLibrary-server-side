@@ -41,31 +41,40 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/favorite', [BookController::class, 'fav']);
 
-    // RENT LOGS STATUS:
+    // START OF RENTLOGS:
     // 1. NEED VERIFICATION
-    // 2. VERIFIED
-    // 3. RETURNED
-    // 4. CANCELED
+    // 2. CANCELED
 
-    // VIOLATION STATUS:
-    // 5. OVERDUE
-    // 6. RETURNED OVERDUE
-    // 7. BROKEN
+    // WHERE RENTLOGS ISACTIVE OR NOTACTIVE:
+    // 3. VERIFIED
+    // 4. RETURNED
 
-    // MAKE NEW RENT LOGS => STATUS == 'NEED VERIFICATION'
+    // RENTLOGS VIOLATION STATUS:
+    // 5. RETURNED OVERDUE
+    // 6. BROKEN
+    // 7. MISSING
+
+    // COMBO RENTLOGS VIOLATION STATUS:
+    // 8. BROKEN & OVERDUE
+    // 9. MISSING & OVERDUE
+
     Route::get('/my-rent/{code}', [RentController::class, 'getOneMyRent']);
     Route::get('/my-rent', [RentController::class, 'getAllMyRent']);
     Route::get('/my-rent-normal', [RentController::class, 'getMyNormalRent']);
     Route::get('/my-rent-violation', [RentController::class, 'getMyViolationRent']);
 
-    Route::get('/rent-needVerification', [RentController::class, 'getViolationRent']);
-    Route::get('/rent-normal', [RentController::class, 'normalRent']);
-    Route::get('/rent-violation', [RentController::class, 'violationRent']);
+    Route::get('/my-rent-overdue', [RentController::class, 'getViolationRent']);
+    Route::get('/my-rent-normal', [RentController::class, 'normalRent']);
+    Route::get('/my-rent-violation', [RentController::class, 'violationRent']);
+
+    // MAKE NEW RENT LOGS => STATUS == 'NEED VERIFICATION'
     Route::post('/rent', [RentController::class, 'newRent']);
 
     // CHANGE STATUS RENT LOGS FROM 'NEED VERIFICATION' TO 'CANCELED'
     Route::post('/rent-cancel/{code}', [RentController::class, 'cancelRent']);
 
+
+    // REVIEW RENT || REVIEW RENT || REVIEW RENT || REVIEW RENT || REVIEW RENT || REVIEW RENT || REVIEW RENT
     Route::post('/rent-review/{code}', [RentController::class, 'rentReview']);
     Route::put('/rent-review/{code}', [RentController::class, 'updateReview']);
     Route::delete('/rent-review/{code}', [RentController::class, 'deleteReview']);
