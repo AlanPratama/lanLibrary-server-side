@@ -33,8 +33,9 @@ Route::get('/test', [AdminController::class, 'test']);
 // AUTH AUTH AUTH AUTH
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::put('/user-update/{slug}', [UserController::class, 'update']);
     Route::put('/user-changePass/{slug}', [UserController::class, 'changePass']);
 

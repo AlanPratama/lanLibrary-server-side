@@ -181,10 +181,17 @@ class AuthController extends Controller
 
     public function user()
     {
-        return response()->json([
-            'status' => 'success',
-            'data' => auth()->user()
-        ]);
+        if (Auth::user()) {
+            return response()->json([
+                'status' => 'success',
+                'data' => auth()->user()
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'unauthorized',
+                'data' => null
+            ]);
+        }
     }
 
 
