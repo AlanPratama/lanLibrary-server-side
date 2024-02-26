@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Favorite;
 use App\Models\Type;
+use App\Models\Writer;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -67,9 +68,9 @@ class BookController extends Controller
             try {
                 $data = [
                     'type_id' => $req->type_id,
+                    'writer' => $req->writer_id,
                     'total_book' => $req->total_book,
                     'title' => $req->title,
-                    'writer' => $req->writer,
                     'publisher' => $req->publisher,
                     'description' => $req->description,
                     'year' => $req->year,
@@ -131,9 +132,9 @@ class BookController extends Controller
 
                 $data = [
                     'type_id' => $req->type_id,
+                    'writer' => $req->writer_id,
                     'total_book' => $req->total_book,
                     'title' => $req->title,
-                    'writer' => $req->writer,
                     'publisher' => $req->publisher,
                     'description' => $req->description,
                     'year' => $req->year,
@@ -253,5 +254,93 @@ class BookController extends Controller
                 'message' => $e->getMessage()
             ]);
         }
+    }
+
+
+
+
+    // WRITER || WRITER || WRITER || WRITER || WRITER || WRITER || WRITER || WRITER || WRITER || WRITER || WRITER
+    public function getAllWriter()
+    {
+        $writers = Writer::paginate(15);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $writers
+        ]);
+    }
+
+    public function getOneWriter($slug)
+    {
+        $writer = Writer::where('slug', $slug)->first();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $writer
+        ]);
+    }
+
+    public function addWriter(Request $req)
+    {
+        $req->validate([
+            'name' => 'required',
+        ]);
+
+        $writer = Writer::create($req->all());
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'SUCCESSFULLY CREATED A NEW WRITER',
+            'data' => $writer
+        ]);
+    }
+
+    public function editWriter(Request $req, $slug)
+    {
+        $req->validate([
+            'name' => 'required',
+        ]);
+
+        $writer = Writer::where('slug', $slug)->first();
+
+        if ($writer) {
+            $writer->name = $req->name;
+            $writer->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'SUCCESSFULLY CREATED A NEW WRITER',
+                'data' => $writer
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'from' => 'notWriter',
+                'message' => 'WRITER NOT FOUND',
+            ]);
+        }
+    }
+
+    public function delWriter($slug)
+    {
+        $writer = Writer::where('slug', $slug)->first();
+
+        if ($writer) {
+            $books = Book::where('writer_id')->get();
+            if ($books->count() > 0) {
+                foreach ($books as $book) {
+                    $book->writer_id = null;
+                    $book->save();
+                }
+            }
+
+            $writer->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'SUCCESSFULLY DELETE A WRITER'
+            ]);
+        }
+
     }
 }

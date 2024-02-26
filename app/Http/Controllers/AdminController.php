@@ -11,7 +11,7 @@ class AdminController extends Controller
     public function test()
     {
         $rent = Rentlogs::with('users', 'books')->get();
-        $book = Book::with('types', 'categories')->paginate(1);
+        $book = Book::with('types', 'writers', 'categories')->paginate(10);
         $user = User::all();
 
         return response()->json([

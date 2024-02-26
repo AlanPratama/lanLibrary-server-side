@@ -17,12 +17,15 @@ return new class extends Migration
             $table->unsignedBigInteger('type_id');
             $table->foreign('type_id')->references('id')->on('types');
 
+            $table->unsignedBigInteger('writer_id')->nullable();
+            $table->foreign('writer_id')->references('id')->on('writer');
+
             $table->integer('total_loan')->default(0);
             $table->integer('total_book')->default(0);
 
             $table->string('title');
             $table->string('slug')->nullable();
-            $table->string('writer');
+
             $table->string('publisher')->nullable();
             $table->text('description');
             $table->integer('year')->nullable();

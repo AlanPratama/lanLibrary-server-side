@@ -21,7 +21,7 @@ class BookFactory extends Factory
             'total_book' => 20,
             'title' => fake()->title(),
             'slug' => Str::slug(fake()->title()),
-            'writer' => fake()->name(),
+            'writer_id' => 1,
             'publisher' => fake()->name(),
             'description' => fake()->text(),
             'year' => 2024,

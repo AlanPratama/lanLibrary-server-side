@@ -24,6 +24,10 @@ class Book extends Model
         return $this->belongsTo(Type::class, 'type_id');
     }
 
+    public function writers() {
+        return $this->belongsTo(Writer::class, 'writer_id');
+    }
+
     public function categories() {
         return $this->belongsToMany(Category::class, 'pivot_categories', 'book_id', 'category_id');
     }
