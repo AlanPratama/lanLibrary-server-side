@@ -29,6 +29,9 @@ Route::get('/type/{slug}', [BookController::class, 'detailType']);
 Route::get('/writer', [BookController::class, 'getAllWriter']);
 Route::get('/writer/{slug}', [BookController::class, 'getOneWriter']);
 
+// SIDE DISH OF BOOK
+Route::get('/side-dish-book', [BookController::class, 'sideDishBook']);
+
 
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
@@ -122,13 +125,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
             // BOOK BOOK BOOK BOOK
-            Route::post('/book', [BookController::class, 'store']);
-            Route::put('/book/{slug}', [BookController::class, 'update']);
+            Route::post('/book', [BookController::class, 'add']);
+            Route::put('/book/{slug}', [BookController::class, 'edit']);
             Route::delete('/book/{slug}', [BookController::class, 'delete']);
 
             Route::post('/writer', [BookController::class, 'addWriter']);
             Route::put('/writer/{slug}', [BookController::class, 'editWriter']);
             Route::delete('/writer/{slug}', [BookController::class, 'delWriter']);
+
+
         });
     });
 });

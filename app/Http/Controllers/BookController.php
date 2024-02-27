@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\Category;
 use App\Models\Favorite;
 use App\Models\Type;
 use App\Models\Writer;
@@ -15,9 +16,23 @@ use Illuminate\Support\Str;
 
 class BookController extends Controller
 {
+    public function sideDishBook()
+    {
+        $types = Type::all();
+        $writers = Writer::all();
+        $categories = Category::all();
+
+        return response()->json([
+            'status' => 'success',
+            'types' => $types,
+            'writers' => $writers,
+            'categories' => $categories
+        ]);
+    }
+
     public function index()
     {
-        $books = Book::with('categories', 'types')->get();
+        $books = Book::with('categories', 'types', 'writers')->orderBy('created_at', 'desc')->get();
 
         return response()->json([
             'status' => 'success',
@@ -49,7 +64,7 @@ class BookController extends Controller
             'type_id' => 'required',
             'total_book' => 'required',
             'title' => 'required|unique:books,title',
-            'writer' => 'required',
+            'writer_id' => 'required',
             'publisher' => '',
             'description' => 'required',
             'year' => '',
@@ -68,7 +83,7 @@ class BookController extends Controller
             try {
                 $data = [
                     'type_id' => $req->type_id,
-                    'writer' => $req->writer_id,
+                    'writer_id' => $req->writer_id,
                     'total_book' => $req->total_book,
                     'title' => $req->title,
                     'publisher' => $req->publisher,
@@ -115,7 +130,7 @@ class BookController extends Controller
                     'type_id' => 'required',
                     'total_book' => 'required',
                     'title' => 'required|unique:books,title,' . $book->id,
-                    'writer' => 'required',
+                    'writer_id' => 'required',
                     'publisher' => '',
                     'description' => 'required',
                     'year' => '',
@@ -132,7 +147,7 @@ class BookController extends Controller
 
                 $data = [
                     'type_id' => $req->type_id,
-                    'writer' => $req->writer_id,
+                    'writer_id' => $req->writer_id,
                     'total_book' => $req->total_book,
                     'title' => $req->title,
                     'publisher' => $req->publisher,
