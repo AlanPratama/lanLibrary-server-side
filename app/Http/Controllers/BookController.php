@@ -110,6 +110,7 @@ class BookController extends Controller
                     'status' => 'success',
                     'message' => 'Successfully Create A New Book',
                     'data' => $book,
+                    'req' => $req->all()
                 ]);
             } catch (Exception $e) {
                 return response()->json([
