@@ -43,7 +43,7 @@ class BookController extends Controller
 
     public function detail($slug)
     {
-        $book = Book::findOrFail($slug);
+        $book = Book::where('slug', $slug)->with('writers', 'types', 'categories')->first();
 
         if ($book) {
             return response()->json([
@@ -125,7 +125,7 @@ class BookController extends Controller
     public function edit(Request $req, $slug)
     {
         try {
-            $book = Book::where('slug' . $slug)->first();
+            $book = Book::where('slug', $slug)->first();
             if ($book) {
                 $validator = Validator::make($req->all(), [
                     'type_id' => 'required',
@@ -142,7 +142,8 @@ class BookController extends Controller
                 if ($validator->fails()) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => $validator->errors()
+                        'message' => $validator->errors(),
+                        'req'=>$req->all()
                     ]);
                 }
 
