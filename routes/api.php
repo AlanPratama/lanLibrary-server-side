@@ -126,7 +126,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             // BOOK BOOK BOOK BOOK
             Route::post('/book', [BookController::class, 'add']);
-            Route::put('/book/{slug}', [BookController::class, 'edit']);
+            Route::post('/book/{slug}', [BookController::class, 'edit']);
             Route::delete('/book/{slug}', [BookController::class, 'delete']);
 
             Route::post('/writer', [BookController::class, 'addWriter']);
