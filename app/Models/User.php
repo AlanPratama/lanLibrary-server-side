@@ -23,7 +23,7 @@ class User extends Authenticatable
         return $this->hasMany(Present::class, 'user_id');
     }
 
-    public function favotites() {
+    public function favorites() {
         return $this->hasMany(Favorite::class, 'user_id');
     }
 

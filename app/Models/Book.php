@@ -33,7 +33,7 @@ class Book extends Model
     }
 
     // ADD TO FAVORITE FOR BOOK
-    public function favotites() {
+    public function favorites() {
         return $this->hasMany(Favorite::class, 'book_id');
     }
 
