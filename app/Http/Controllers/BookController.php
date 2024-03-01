@@ -162,14 +162,13 @@ class BookController extends Controller
                     if ($data['cover']) {
                         Storage::delete($data['cover']);
                     }
-                } else {
                     $fileName = Str::slug($req->title) . '.' . $req->file('cover')->getClientOriginalExtension();
                     $path = $req->file('cover')->storeAs('books', $fileName);
                     $data['cover'] = '/storage/' . $path;
                 }
 
                 $book->slug = null;
-                $book->save($data);
+                $book->update($data);
 
                 if ($req->has('categories')) {
                     $book->categories()->sync($req->input('categories'));
