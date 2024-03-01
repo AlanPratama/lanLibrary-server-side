@@ -200,11 +200,10 @@ class BookController extends Controller
     public function delete($slug)
     {
         try {
-            // RENTLOGS, REVIEW, TYPE, CATEGORIES, FAVORITES
+            // RENTLOGS, REVIEW, CATEGORIES, FAVORITES
             $book = Book::where('slug', $slug)->first();
 
             if ($book) {
-                $book->types->delete();
                 $book->rentlogs()->delete();
                 $book->reviews()->delete();
                 $book->favorites()->delete();
