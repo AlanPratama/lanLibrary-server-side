@@ -209,7 +209,11 @@ class BookController extends Controller
                 $book->favorites()->delete();
                 $book->categories()->detach();
 
-                Storage::delete($book->cover);
+                if ($book->cover != '/assets/404-book-img.png') {
+                    $img = str_replace('/storage', '', $book->cover);
+                    Storage::delete($img);
+                }
+
                 $book->delete();
 
                 return response()->json([
