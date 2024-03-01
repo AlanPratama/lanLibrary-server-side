@@ -39,7 +39,7 @@ class Book extends Model
 
     // REVIEWS RELATIONAL
     public function reviews() {
-        return $this->hasMany(Reviews::class, 'user_id');
+        return $this->hasMany(Reviews::class, 'book_id');
     }
 
 
