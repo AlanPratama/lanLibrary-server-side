@@ -37,12 +37,12 @@ class BookController extends Controller
             ->orderBy('created_at', 'desc')
             ->where('title', 'LIKE', '%' . $req->title . '%')
             ->where('type_id', $req->type)
-            ->get();
+            ->paginate(15);
         } else {
             $books = Book::with('categories', 'types', 'writers')
             ->orderBy('created_at', 'desc')
             ->where('title', 'LIKE', '%' . $req->title . '%')
-            ->get();
+            ->paginate(15);
         }
 
         return response()->json([
@@ -170,8 +170,9 @@ class BookController extends Controller
                 ];
 
                 if ($req->hasFile('cover')) {
-                    if ($data['cover']) {
-                        Storage::delete($data['cover']);
+                    if ($data['cover'] != '/assets/404-book-img.png') {
+                        $img = str_replace('/storage', '', $data['cover']);
+                        Storage::delete($img);
                     }
                     $fileName = Str::slug($req->title) . '.' . $req->file('cover')->getClientOriginalExtension();
                     $path = $req->file('cover')->storeAs('books', $fileName);
