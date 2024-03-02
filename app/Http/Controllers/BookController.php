@@ -30,9 +30,20 @@ class BookController extends Controller
         ]);
     }
 
-    public function index()
+    public function index(Request $req)
     {
-        $books = Book::with('categories', 'types', 'writers')->orderBy('created_at', 'desc')->get();
+        if ($req->type) {
+            $books = Book::with('categories', 'types', 'writers')
+            ->orderBy('created_at', 'desc')
+            ->where('title', 'LIKE', '%' . $req->title . '%')
+            ->where('type_id', $req->type)
+            ->get();
+        } else {
+            $books = Book::with('categories', 'types', 'writers')
+            ->orderBy('created_at', 'desc')
+            ->where('title', 'LIKE', '%' . $req->title . '%')
+            ->get();
+        }
 
         return response()->json([
             'status' => 'success',
