@@ -14,29 +14,68 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::create([
-            'role' => 'admin',
-            'position' => 'Staff Library',
+            'role' => 'user',
+            'position' => 'Member',
 
-            'name' => 'Alan Pratama',
-            'slug' => 'alan-pratama',
-            'email' => 'pralan76@gmail.com',
-            'phone' => '085817000942',
+            'name' => 'Zikriyandri Riedwan',
+            'slug' => 'zikriyandri-riedwan',
+            'email' => 'zikriyandri@gmail.com',
+            'phone' => '0858170002311',
 
-            'username' => 'lalan',
-            'password' => bcrypt('lalan'),
+            'username' => 'zikriri',
+            'password' => bcrypt('zikriri'),
         ]);
 
         User::create([
-            'role' => 'admin',
-            'position' => 'Staff Library',
+            'role' => 'user',
+            'position' => 'Member',
 
-            'name' => 'Muhammad Arif Ibrahim',
-            'slug' => 'arif-ibrahim',
-            'email' => 'arif@gmail.com',
-            'phone' => '085817000930',
+            'name' => 'Fathul Bari',
+            'slug' => 'fathul-bari',
+            'email' => 'fbariaja@gmail.com',
+            'phone' => '0858170273930',
 
-            'username' => 'arifff',
-            'password' => bcrypt('arifff'),
+            'username' => 'fbariaja',
+            'password' => bcrypt('fbariaja'),
+        ]);
+
+        User::create([
+            'role' => 'user',
+            'position' => 'Member',
+
+            'name' => 'Helmi Fawwaz Raihan',
+            'slug' => 'helmi-fawwaz-raihan',
+            'email' => 'helmi@gmail.com',
+            'phone' => '0858170203330',
+
+            'username' => 'helmiF',
+            'password' => bcrypt('helmiF'),
+        ]);
+
+        User::create([
+            'role' => 'user',
+            'position' => 'Member',
+
+            'name' => 'Muhammad Ridho',
+            'slug' => 'muhammad-ridho',
+            'email' => 'ridho@gmail.com',
+            'phone' => '082420273930',
+
+            'username' => 'ridhoR',
+            'password' => bcrypt('ridhoR'),
+        ]);
+
+        User::create([
+            'role' => 'user',
+            'position' => 'Member',
+
+            'name' => 'Arva Revanza Eferio Wempysono',
+            'slug' => 'arva-revanza-eferio-wempysono',
+            'email' => 'arva@gmail.com',
+            'phone' => '08893870273930',
+
+            'username' => 'arva',
+            'password' => bcrypt('arva'),
         ]);
     }
 }

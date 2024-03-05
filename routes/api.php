@@ -119,6 +119,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             // USER USER USER USER
             Route::get('/user', [OfficerController::class, 'getUser']);
+            Route::post('/activing-user/{slug}', [OfficerController::class, 'activingUser']);
             Route::post('/user', [OfficerController::class, 'addUser']);
             Route::put('/user/{slug}', [OfficerController::class, 'editUser']);
             Route::delete('/user/{slug}', [OfficerController::class, 'delUser']);

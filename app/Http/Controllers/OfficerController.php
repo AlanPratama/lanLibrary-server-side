@@ -13,6 +13,46 @@ use Illuminate\Support\Str;
 class OfficerController extends Controller
 {
 
+    public function activingUser($slug)
+    {
+        if (Auth::user()->role != 'user') {
+            $user = User::where('slug', $slug)->first();
+
+            if ($user) {
+                $message = null;
+                if ($user->verified == 'Not Verified') {
+                    $user->verified = 'Verified';
+                    $user->save();
+
+                    $message = "SUCCESSFULLY VERIFIED USER";
+                } else if ($user->verified == 'Verified') {
+                    $user->verified = 'Not Verified';
+                    $user->save();
+
+                    $message = "SUCCESSFULLY UNVERIFIED USER";
+                }
+
+                return response()->json([
+                    'status' => "success",
+                    "message" => $message,
+                    "data" => $user,
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'USER NOT FOUND',
+                ]);
+            }
+        }else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'YOUR CANNOT ACCESS THIS ENDPOINT',
+            ]);
+        }
+    }
+
+
+
     public function getUser()
     {
         if (Auth::user()->role == 'user') {
@@ -21,7 +61,7 @@ class OfficerController extends Controller
                 'message' => 'YOU ARE NOT LIB MANAGER'
             ]);
         } else {
-            $user = User::paginate(15);
+            $user = User::where('id', '!=', Auth::user()->id)->paginate(15);
 
             return response()->json([
                 'status' => 'success',
@@ -80,7 +120,6 @@ class OfficerController extends Controller
                 'message' => 'SUCCESSFULLY CREATE A NEW USER',
                 'data' => $user
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -158,7 +197,6 @@ class OfficerController extends Controller
                         'message' => 'SUCCESSFULLY CREATE A NEW USER',
                         'data' => $user
                     ]);
-
                 } catch (Exception $e) {
                     return response()->json([
                         'status' => 'error',
@@ -200,7 +238,6 @@ class OfficerController extends Controller
                     'status' => 'success',
                     'message' => 'SUCCESSFULLY DELETED USER',
                 ]);
-
             }
         } else {
             return response()->json([
