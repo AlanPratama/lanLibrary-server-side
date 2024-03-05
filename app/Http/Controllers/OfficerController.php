@@ -61,7 +61,13 @@ class OfficerController extends Controller
                 'message' => 'YOU ARE NOT LIB MANAGER'
             ]);
         } else {
-            $user = User::where('id', '!=', Auth::user()->id)->paginate(15);
+            if (Auth::user()->role == 'admin') {
+                $user = User::where('id', '!=', Auth::user()->id)->paginate(15);
+            } else {
+                $user = User::where('id', '!=', Auth::user()->id)
+                    ->where('role', '=', 'admin')
+                    ->paginate(15);
+            }
 
             return response()->json([
                 'status' => 'success',
