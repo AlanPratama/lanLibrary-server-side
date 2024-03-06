@@ -62,11 +62,11 @@ class OfficerController extends Controller
             ]);
         } else {
             if (Auth::user()->role == 'admin') {
-                $user = User::where('id', '!=', Auth::user()->id)->paginate(2);
+                $user = User::where('id', '!=', Auth::user()->id)->paginate(5);
             } else {
                 $user = User::where('id', '!=', Auth::user()->id)
                     ->where('role', '=', 'admin')
-                    ->paginate(2);
+                    ->paginate(5);
             }
 
             return response()->json([
