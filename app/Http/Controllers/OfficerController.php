@@ -53,17 +53,6 @@ class OfficerController extends Controller
     }
 
 
-    public function getPassUser($slug)
-    {
-        $user = User::where('slug', $slug)->first();
-        if ($user) {
-            return response()->json([
-                'status' => 'success',
-                'data' => $user->password
-            ], 200);
-        }
-    }
-
     public function changePassUser(Request $req, $slug)
     {
         $user = User::where('slug', $slug)->first();

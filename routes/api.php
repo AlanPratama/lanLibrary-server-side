@@ -126,7 +126,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('/user/{slug}', [OfficerController::class, 'delUser']);
 
             Route::post('/change-pass-user/{slug}', [OfficerController::class, 'changePassUser']);
-            Route::get('/user-get-pass/{slug}', [OfficerController::class, 'getPassUser']);
 
             // BOOK BOOK BOOK BOOK
             Route::post('/book', [BookController::class, 'add']);
