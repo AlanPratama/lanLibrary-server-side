@@ -6,6 +6,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
 use Illuminate\Support\Str;
@@ -48,6 +49,43 @@ class OfficerController extends Controller
                 'status' => 'error',
                 'message' => 'YOUR CANNOT ACCESS THIS ENDPOINT',
             ]);
+        }
+    }
+
+
+    public function getPassUser($slug)
+    {
+        $user = User::where('slug', $slug)->first();
+        if ($user) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $user->password
+            ], 200);
+        }
+    }
+
+    public function changePassUser(Request $req, $slug)
+    {
+        $user = User::where('slug', $slug)->first();
+        if ($user) {
+            $req->validate([
+                'newPass' => 'required|min:6',
+                'confirmNewPass' => 'required|same:newPass'
+            ]);
+
+            $user->password = bcrypt($req->newPass);
+            $user->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'SUCCESS CHANGED USER PASSWORD',
+                'data' => $user
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 'not found',
+                'message' => 'USER NOT FOUND'
+            ], 404);
         }
     }
 
