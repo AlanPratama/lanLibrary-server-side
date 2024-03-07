@@ -224,18 +224,20 @@ class OfficerController extends Controller
         $user = User::where('slug', $slug)->first();
 
         if ($user) {
-            if ($user->role == 'admin' || $user->role == 'officer' && Auth::user()->role != 'admin') {
+            if ($user->role == 'admin' && Auth::user()->role != 'admin') {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'YOU ARE NOT AMDIN'
-                ]);
+                ], 403);
             } else {
-                $user->rentlogs->delete();
-                $user->presents->delete();
-                $user->favotites->delete();
+                $user->rentlogs()->delete();
+                $user->presents()->delete();
+                $user->favorites()->delete();
+                $user->reviews()->delete();
 
                 if ($user->proPic != '/assets/404-user-img.png') {
-                    Storage::delete($user->proPic);
+                    $pathImg = str_replace('/storage', '', $user->proPic);
+                    Storage::delete($pathImg);
                 }
 
                 $user->delete();
