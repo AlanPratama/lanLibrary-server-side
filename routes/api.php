@@ -41,6 +41,7 @@ Route::get('/test', [AdminController::class, 'test']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
+    Route::get('/user/{slug}', [UserController::class, 'getOneUser']);
 
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::put('/user-update/{slug}', [UserController::class, 'update']);
@@ -121,7 +122,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/user', [OfficerController::class, 'getUser']);
             Route::post('/activing-user/{slug}', [OfficerController::class, 'activingUser']);
             Route::post('/user', [OfficerController::class, 'addUser']);
-            Route::put('/user/{slug}', [OfficerController::class, 'editUser']);
+            Route::post('/user/{slug}', [OfficerController::class, 'editUser']);
             Route::delete('/user/{slug}', [OfficerController::class, 'delUser']);
 
 

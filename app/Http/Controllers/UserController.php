@@ -4,10 +4,37 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+
+    public function getOneUser($slug)
+    {
+        $user = User::where('slug', $slug)->first();
+
+        if ($user) {
+            if (Auth::user()->id == $user->id || Auth::user()->role == 'admin' || Auth::user()->role == 'officer') {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $user
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 'Forbidden',
+                    'meesage' => 'YOU ARE NOT ABLE TO ACCESS THIS USER INFORMATION'
+                ]);
+            }
+        } else {
+            return response()->json([
+                'status' => 'not found',
+                'meesage' => 'USER NOT FOUND'
+            ], 404);
+        }
+    }
+
+
     public function update(Request $req, $slug)
     {
         $user = User::where('slug', $slug)->first();

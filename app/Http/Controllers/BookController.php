@@ -119,7 +119,7 @@ class BookController extends Controller
 
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Successfully Create A New Book',
+                    'message' => 'Success Create A New Book',
                     'data' => $book,
                 ]);
             } catch (Exception $e) {
@@ -191,7 +191,7 @@ class BookController extends Controller
 
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Successfully Updated Book Information',
+                    'message' => 'Success Updated Book Information',
                     'data' => $book,
                 ]);
             } else {
@@ -230,7 +230,7 @@ class BookController extends Controller
 
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Successfully Deleted A Book',
+                    'message' => 'Success Deleted A Book',
                 ]);
             } else {
                 return response()->json([
@@ -268,14 +268,14 @@ class BookController extends Controller
 
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'SUCCESSFULLY FAVORITE THIS BOOK',
+                    'message' => 'SUCCESS FAVORITE THIS BOOK',
                 ]);
             } else {
                 $fav->delete();
 
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'SUCCESSFULLY UNFAVORITE THIS BOOK',
+                    'message' => 'SUCCESS UNFAVORITE THIS BOOK',
                 ]);
             }
         } catch (Exception $e) {
@@ -320,7 +320,7 @@ class BookController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'SUCCESSFULLY CREATED A NEW WRITER',
+            'message' => 'SUCCESS CREATED A NEW WRITER',
             'data' => $writer
         ]);
     }
@@ -339,7 +339,7 @@ class BookController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'SUCCESSFULLY CREATED A NEW WRITER',
+                'message' => 'SUCCESS CREATED A NEW WRITER',
                 'data' => $writer
             ]);
         } else {
@@ -368,7 +368,7 @@ class BookController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'SUCCESSFULLY DELETE A WRITER'
+                'message' => 'SUCCESS DELETE A WRITER'
             ]);
         }
 

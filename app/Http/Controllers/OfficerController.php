@@ -24,12 +24,12 @@ class OfficerController extends Controller
                     $user->verified = 'Verified';
                     $user->save();
 
-                    $message = "SUCCESSFULLY VERIFIED USER";
+                    $message = "SUCCESS VERIFIED USER";
                 } else if ($user->verified == 'Verified') {
                     $user->verified = 'Not Verified';
                     $user->save();
 
-                    $message = "SUCCESSFULLY UNVERIFIED USER";
+                    $message = "SUCCESS UNVERIFIED USER";
                 }
 
                 return response()->json([
@@ -123,7 +123,7 @@ class OfficerController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'SUCCESSFULLY CREATE A NEW USER',
+                'message' => 'SUCCESS CREATE A NEW USER',
                 'data' => $user
             ]);
         } catch (Exception $e) {
@@ -141,22 +141,22 @@ class OfficerController extends Controller
         $user = User::where('slug', $slug)->first();
 
         if ($user) {
-            if ($user->role == 'admin' || $user->role == 'officer' && Auth::user()->role != 'admin') {
+            if ($user->role == 'admin' && Auth::user()->role != 'admin') {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'YOU ARE NOT ADMIN'
-                ]);
+                ], 403);
             } else {
                 $validator = FacadesValidator::make($req->all(), [
                     'role' => 'required',
                     'position' => 'required',
                     'name' => 'required',
-                    'email' => 'required|unique:users,email',
+                    'email' => 'required|unique:users,email,'.$user->id,
                     'phone' => 'required',
                     'proPic' => 'max:5000',
-                    'username' => 'required|unique:users,username',
-                    'password' => '',
-                    'confirmPassword' => 'same:password'
+                    'username' => 'required|unique:users,username,'.$user->id,
+                    // 'password' => '',
+                    // 'confirmPassword' => 'same:password'
                 ]);
 
                 if ($validator->fails()) {
@@ -170,7 +170,7 @@ class OfficerController extends Controller
 
                 try {
                     $data = [
-                        'proPic' => '/assets/404-user-img.png',
+                        'proPic' => $user->proPic,
 
                         'role' => $req->role,
                         'position' => $req->position,
@@ -178,29 +178,29 @@ class OfficerController extends Controller
                         'email' => $req->email,
                         'phone' => $req->phone,
                         'username' => $req->username,
-                        'password' => $user->password,
                     ];
 
-                    if ($req->has('password')) {
-                        $data['password'] = bcrypt($req->password);
-                    }
+                    // if ($req->has('password')) {
+                    //     $data['password'] = bcrypt($req->password);
+                    // }
 
                     if ($req->hasFile('proPic')) {
                         if ($user->proPic != '/assets/404-user-img.png') {
-                            Storage::delete($user->proPic);
+                            $pathImg = str_replace('/storage', '', $data['proPic']);
+                            Storage::delete($pathImg);
                         }
 
-                        $fileName = Str::slug($req->username) . '.' . $req->file('proPic')->getClientOriginalName();
+                        $fileName = Str::slug($req->username) . '.' . $req->file('proPic')->getClientOriginalExtension();
                         $path = $req->file('proPic')->storeAs('users', $fileName);
-                        $data['proPic'] = $path;
+                        $data['proPic'] = '/storage/' . $path;
                     }
 
                     $user->slug = null;
-                    $user->save($data);
+                    $user->update($data);
 
                     return response()->json([
                         'status' => 'success',
-                        'message' => 'SUCCESSFULLY CREATE A NEW USER',
+                        'message' => 'SUCCESS UPDATED USER INFORMATION',
                         'data' => $user
                     ]);
                 } catch (Exception $e) {
@@ -242,7 +242,7 @@ class OfficerController extends Controller
 
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'SUCCESSFULLY DELETED USER',
+                    'message' => 'SUCCESS DELETED USER',
                 ]);
             }
         } else {
