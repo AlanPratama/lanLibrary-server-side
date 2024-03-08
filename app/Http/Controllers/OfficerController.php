@@ -44,7 +44,7 @@ class OfficerController extends Controller
                     'message' => 'USER NOT FOUND',
                 ]);
             }
-        }else {
+        } else {
             return response()->json([
                 'status' => 'error',
                 'message' => 'YOUR CANNOT ACCESS THIS ENDPOINT',
@@ -111,10 +111,10 @@ class OfficerController extends Controller
             'position' => 'required',
             'name' => 'required',
             'email' => 'required|unique:users,email',
-            'phone' => 'required',
+            'phone' => 'required|min:6',
             'proPic' => 'max:5000',
-            'username' => 'required|unique:users,username',
-            'password' => 'required',
+            'username' => 'required|min:6|unique:users,username',
+            'password' => 'required|min:6',
             'confirmPassword' => 'same:password'
         ]);
 
@@ -123,7 +123,7 @@ class OfficerController extends Controller
                 'status' => 'error',
                 'from' => 'validator',
                 'message' => $validator->errors()
-            ]);
+            ], 400);
         }
 
 
@@ -143,15 +143,25 @@ class OfficerController extends Controller
             if ($req->hasFile('proPic')) {
                 $fileName = Str::slug($req->username) . '.' . $req->file('proPic')->getClientOriginalName();
                 $path = $req->file('proPic')->storeAs('users', $fileName);
-                $data['proPic'] = $path;
+                $data['proPic'] =  '/storage/' . $path;
             }
 
             $user = User::create($data);
 
+            if (Auth::user()->role == 'admin') {
+                $newData = User::where('id', '!=', Auth::user()->id)->paginate(5);
+            } else {
+                $newData = User::where('id', '!=', Auth::user()->id)
+                    ->where('role', '=', 'admin')
+                    ->paginate(5);
+            }
+
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'SUCCESS CREATE A NEW USER',
-                'data' => $user
+                'data' => $user,
+                'newData' => $newData,
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -178,10 +188,10 @@ class OfficerController extends Controller
                     'role' => 'required',
                     'position' => 'required',
                     'name' => 'required',
-                    'email' => 'required|unique:users,email,'.$user->id,
+                    'email' => 'required|unique:users,email,' . $user->id,
                     'phone' => 'required',
                     'proPic' => 'max:5000',
-                    'username' => 'required|unique:users,username,'.$user->id,
+                    'username' => 'required|unique:users,username,' . $user->id,
                     // 'password' => '',
                     // 'confirmPassword' => 'same:password'
                 ]);
