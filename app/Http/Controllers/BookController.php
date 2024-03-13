@@ -16,6 +16,32 @@ use Illuminate\Support\Str;
 
 class BookController extends Controller
 {
+    public function getBooks(Request $req)
+    {
+        if ($req->paginate) {
+            $books = Book::with('types', 'categories', 'writers')->paginate($req->paginate);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $books
+            ]);
+        } else {
+            $books = Book::all();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $books
+            ]);
+        }
+    }
+
+
+
+
+
+
+
+
     public function sideDishBook()
     {
         $types = Type::all();
@@ -34,15 +60,15 @@ class BookController extends Controller
     {
         if ($req->type) {
             $books = Book::with('categories', 'types', 'writers')
-            ->orderBy('created_at', 'desc')
-            ->where('title', 'LIKE', '%' . $req->title . '%')
-            ->where('type_id', $req->type)
-            ->paginate(15);
+                ->orderBy('created_at', 'desc')
+                ->where('title', 'LIKE', '%' . $req->title . '%')
+                ->where('type_id', $req->type)
+                ->paginate(15);
         } else {
             $books = Book::with('categories', 'types', 'writers')
-            ->orderBy('created_at', 'desc')
-            ->where('title', 'LIKE', '%' . $req->title . '%')
-            ->paginate(15);
+                ->orderBy('created_at', 'desc')
+                ->where('title', 'LIKE', '%' . $req->title . '%')
+                ->paginate(15);
         }
 
         return response()->json([
@@ -91,42 +117,52 @@ class BookController extends Controller
         } else {
 
 
-            try {
-                $data = [
-                    'type_id' => $req->type_id,
-                    'writer_id' => $req->writer_id,
-                    'total_book' => $req->total_book,
-                    'title' => $req->title,
-                    'publisher' => $req->publisher,
-                    'description' => $req->description,
-                    'year' => $req->year,
-                    'page' => $req->page,
-                    'cover' => '/assets/404-book-img.png',
-                ];
+            $type = Type::findOrFail($req->type_id);
+            if ($type) {
+                try {
+                    $data = [
+                        'type_id' => $req->type_id,
+                        'writer_id' => $req->writer_id,
+                        'total_book' => $req->total_book,
+                        'title' => $req->title,
+                        'publisher' => $req->publisher,
+                        'description' => $req->description,
+                        'year' => $req->year,
+                        'page' => $req->page,
+                        'cover' => '/assets/404-book-img.png',
+                    ];
 
-                if ($req->hasFile('cover')) {
-                    $file = $req->file('cover');
-                    $fileName = Str::slug($req->title) . '.' . $file->getClientOriginalExtension();
-                    $path = $file->storeAs('books', $fileName);
-                    $data['cover'] =  '/storage/' . $path;
+                    if ($req->hasFile('cover')) {
+                        $file = $req->file('cover');
+                        $fileName = Str::slug($req->title) . '.' . $file->getClientOriginalExtension();
+                        $path = $file->storeAs('books', $fileName);
+                        $data['cover'] =  '/storage/' . $path;
+                    }
+
+                    $book = Book::create($data);
+                    $type->total_book += 1;
+                    $type->update();
+
+                    if ($req->has('categories')) {
+                        $book->categories()->sync($req->input('categories'));
+                    }
+
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Success Create A New Book',
+                        'data' => $book,
+                    ]);
+                } catch (Exception $e) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => $e->getMessage()
+                    ]);
                 }
-
-                $book = Book::create($data);
-
-                if ($req->has('categories')) {
-                    $book->categories()->sync($req->input('categories'));
-                }
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Success Create A New Book',
-                    'data' => $book,
-                ]);
-            } catch (Exception $e) {
+            } else {
                 return response()->json([
                     'status' => 'error',
-                    'message' => $e->getMessage()
-                ]);
+                    'message' => 'ERROR! INVALID TYPE'
+                ], 400);
             }
         }
     }
@@ -153,7 +189,7 @@ class BookController extends Controller
                     return response()->json([
                         'status' => 'error',
                         'message' => $validator->errors(),
-                        'req'=>$req->all()
+                        'req' => $req->all()
                     ]);
                 }
 
@@ -179,8 +215,32 @@ class BookController extends Controller
                     $data['cover'] = '/storage/' . $path;
                 }
 
-                $book->slug = null;
-                $book->update($data);
+                if ($book->type_id) {
+                    $oldType = $book->type_id;
+                    if ($oldType == $req->type_id) {
+                        $book->slug = null;
+                        $book->update($data);
+                    } else {
+                        $oldType = Type::findOrFail($oldType);
+                        $oldType->total_book -= 1;
+                        $oldType->update();
+
+                        $newType = Type::findOrFail($req->type_id);
+                        $newType->total_book += 1;
+                        $newType->update();
+
+                        $book->slug = null;
+                        $book->update($data);
+                    }
+                } else {
+                    $newType = Type::findOrFail($req->type_id);
+                    $newType->total_book += 1;
+                    $newType->update();
+
+                    $book->slug = null;
+                    $book->update($data);
+                }
+
 
                 if ($req->has('categories')) {
                     $book->categories()->sync($req->input('categories'));
@@ -220,6 +280,8 @@ class BookController extends Controller
                 $book->reviews()->delete();
                 $book->favorites()->delete();
                 $book->categories()->detach();
+                $book->types->total_book -= 1;
+                $book->types->save();
 
                 if ($book->cover != '/assets/404-book-img.png') {
                     $img = str_replace('/storage', '', $book->cover);
@@ -371,6 +433,5 @@ class BookController extends Controller
                 'message' => 'SUCCESS DELETE A WRITER'
             ]);
         }
-
     }
 }

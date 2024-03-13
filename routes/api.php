@@ -3,8 +3,10 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OfficerController;
 use App\Http\Controllers\RentController;
+use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,14 +22,19 @@ use Illuminate\Support\Facades\Route;
 */
 
 // NOT AUTH NOT AUTH NOT AUTH
+Route::get('/getBooks', [BookController::class, 'getBooks']);
+
 Route::get('/book', [BookController::class, 'index']);
 Route::get('/book/{slug}', [BookController::class, 'detail']);
 
-Route::get('/type', [BookController::class, 'getType']);
-Route::get('/type/{slug}', [BookController::class, 'detailType']);
+Route::get('/type', [TypeController::class, 'index']);
+Route::get('/type/{slug}', [TypeController::class, 'show']);
 
 Route::get('/writer', [BookController::class, 'getAllWriter']);
 Route::get('/writer/{slug}', [BookController::class, 'getOneWriter']);
+
+Route::get('/category', [CategoryController::class, 'index']);
+Route::get('/category/{slug}', [CategoryController::class, 'show']);
 
 // SIDE DISH OF BOOK
 Route::get('/side-dish-book', [BookController::class, 'sideDishBook']);
@@ -136,6 +143,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('/writer/{slug}', [BookController::class, 'editWriter']);
             Route::delete('/writer/{slug}', [BookController::class, 'delWriter']);
 
+            Route::post('/type', [TypeController::class, 'add']);
+            Route::post('/type/{slug}', [TypeController::class, 'edit']);
+            Route::delete('/type/{slug}', [TypeController::class, 'delete']);
+
+            Route::post('/category', [CategoryController::class, 'add']);
+            Route::post('/category/{slug}', [CategoryController::class, 'edit']);
+            Route::delete('/category/{slug}', [CategoryController::class, 'delete']);
 
         });
     });

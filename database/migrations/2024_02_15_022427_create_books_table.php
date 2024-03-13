@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('books', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedBigInteger('type_id');
+            $table->unsignedBigInteger('type_id')->nullable();
             $table->foreign('type_id')->references('id')->on('types');
 
             $table->unsignedBigInteger('writer_id')->nullable();
